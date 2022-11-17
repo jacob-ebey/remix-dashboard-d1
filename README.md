@@ -24,6 +24,8 @@ This starts your app in development mode.
 
 ## Deployment
 
+### First deployment
+
 Create a database:
 
 ```sh
@@ -41,6 +43,16 @@ Build and deploy:
 ```sh
 npm run build && npx wrangler publish
 ```
+
+## Subsequent deployments
+
+Configure a GitHub Actions secrets of `CF_API_TOKEN` with the normal worker deployment permissions + the new D1 wright permissions to be able to apply migrations on deployment.
+
+To trigger a deployment:
+
+- Navigate to the "Actions" tab of your GitHub repository
+- Select the "Deploy" action
+- Use the dropdown labeled "Run Workflow" to select a branch and start the deployment
 
 ## Resources
 
