@@ -38,13 +38,6 @@ export class D1ItemsService implements ItemsService {
 			: undefined;
 	}
 	async createItem({ label }: { label: string }) {
-		// `lastRowId` is not yet implemented in the D1 alpha
-		// const result = await this.db
-		// 	.prepare("INSERT INTO `Item` (`label`) VALUES (?);")
-		// 	.bind(label)
-		// 	.run();
-		// const createdId = result.lastRowId;
-
 		const result = await this.db
 			.prepare("INSERT INTO `Item` (`label`) VALUES (?) RETURNING `id`;")
 			.bind(label)
