@@ -1,0 +1,54 @@
+name: Deploy
+on:
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}
+jobs:
+  deploy:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: NPM Globals Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: NPM Locals Cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+      - name: NPM Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish
+        uses: cloudflare/wrangler-action@2.0.0
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: server-build
+          path: build/
+          retention-days: 30
+      - uses: actions/upload-artifact@v3
+        with:
+          name: client-build
+          path: public/build/
+          retention-days: 30
