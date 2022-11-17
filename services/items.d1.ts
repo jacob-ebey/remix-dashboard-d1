@@ -11,7 +11,7 @@ export class D1ItemsService implements ItemsService {
 		const result = await this.db
 			.prepare("SELECT `id`, `label` FROM `Item`;")
 			.all<{
-				id: string;
+				id: number;
 				label: string;
 			}>();
 
@@ -20,7 +20,7 @@ export class D1ItemsService implements ItemsService {
 		}
 
 		return result.results.map((item) => ({
-			id: item.id,
+			id: "" + item.id,
 			label: item.label,
 		}));
 	}
@@ -28,26 +28,28 @@ export class D1ItemsService implements ItemsService {
 		const result = await this.db
 			.prepare("SELECT `id`, `label` FROM `Item` WHERE `id` = ?;")
 			.bind(id)
-			.first<{ id: string; label: string }>();
+			.first<{ id: number; label: string }>();
 
 		return result
 			? {
-					id: result.id,
+					id: "" + result.id,
 					label: result.label,
 			  }
 			: undefined;
 	}
 	async createItem({ label }: { label: string }) {
-		const result = await this.db
-			.prepare("INSERT INTO `Item` (`label`) VALUES (?);")
-			.bind(label)
-			.run();
+		const [insertResult, selectResult] = (await this.db.batch([
+			this.db.prepare("INSERT INTO `Item` (`label`) VALUES (?);").bind(label),
+			this.db.prepare("SELECT `id` FROM `Item` ORDER BY `id` DESC LIMIT 1;"),
+		])) as [D1Result<unknown>, D1Result<{ id: number }>];
 
-		if (typeof result.lastRowId !== "number") {
+		let createdId = insertResult.lastRowId || selectResult.results?.[0]?.id;
+
+		if (typeof createdId !== "number") {
 			throw new Error("Failed to create item.");
 		}
 
-		return "" + result.lastRowId;
+		return "" + createdId;
 	}
 	async deleteItemById(id: string) {
 		const result = await this.db
