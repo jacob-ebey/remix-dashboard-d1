@@ -59,8 +59,9 @@ export class D1ItemsService implements ItemsService {
 			.bind(id)
 			.run();
 
-		if (!result.changes) {
-			throw new Error("Failed to delete item.");
-		}
+		// This is not yet implemented in the D1 alpha
+		// if (!result.changes) {
+		// 	throw new Error("Failed to delete item.");
+		// }
 	}
 }
