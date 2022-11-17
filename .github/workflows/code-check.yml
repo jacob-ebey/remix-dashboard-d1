@@ -1,0 +1,43 @@
+name: Code Check
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  code-check:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: NPM Globals Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: NPM Locals Cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+      - name: NPM Install
+        run: npm ci
+
+      - name: Prettier Check
+        run: npx prettier -c .
+
+      - name: ESLint Check
+        run: npx eslint .

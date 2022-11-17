@@ -1,0 +1,23 @@
+name = "remix-dashboard-d1"
+main = "worker.ts"
+compatibility_date = "2022-11-17"
+compatibility_flags = ["streams_enable_constructors"]
+
+[site]
+bucket = "./public"
+
+[[d1_databases]]
+binding = "APP_DB"
+database_name = "remix-dashboard-d1-example-db"
+database_id = "c7dc8b3e-f90c-40e4-a1a1-13356eda9209"
+
+[env.development.define]
+"process.env.REMIX_DEV_SERVER_WS_PORT" = "8002"
+
+[env.development.vars]
+SESSION_SECRET = "this-should-be-a-secret"
+
+[[env.development.d1_databases]]
+binding = "APP_DB"
+database_name = "remix-dashboard-d1-example-db"
+database_id = ""

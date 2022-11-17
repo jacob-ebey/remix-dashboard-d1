@@ -1,0 +1,33 @@
+name: Format
+on:
+  push:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  prettier:
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+      - name: NPM Globals Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-format-node-globals
+
+      - name: Prettier Check
+        run: npx prettier -w .
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "ci: prettier"
+          create_branch: false

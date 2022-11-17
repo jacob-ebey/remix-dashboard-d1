@@ -1,0 +1,5 @@
+.cache/
+app/styles/
+build/
+node_modules/
+public/
