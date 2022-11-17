@@ -38,6 +38,8 @@ export class D1ItemsService implements ItemsService {
 			: undefined;
 	}
 	async createItem({ label }: { label: string }) {
+		// The D1 alpha does not yet support `lastRowId`, so this is a workaround
+		// to select the last created ID in a batched query set.
 		const [insertResult, selectResult] = (await this.db.batch([
 			this.db.prepare("INSERT INTO `Item` (`label`) VALUES (?);").bind(label),
 			this.db.prepare("SELECT `id` FROM `Item` ORDER BY `id` DESC LIMIT 1;"),
