@@ -38,14 +38,18 @@ export class D1ItemsService implements ItemsService {
 			: undefined;
 	}
 	async createItem({ label }: { label: string }) {
-		// The D1 alpha does not yet support `lastRowId`, so this is a workaround
-		// to select the last created ID in a batched query set.
-		const [insertResult, selectResult] = (await this.db.batch([
-			this.db.prepare("INSERT INTO `Item` (`label`) VALUES (?);").bind(label),
-			this.db.prepare("SELECT `id` FROM `Item` ORDER BY `id` DESC LIMIT 1;"),
-		])) as [D1Result<unknown>, D1Result<{ id: number }>];
+		// `lastRowId` is not yet implemented in the D1 alpha
+		// const result = await this.db
+		// 	.prepare("INSERT INTO `Item` (`label`) VALUES (?);")
+		// 	.bind(label)
+		// 	.run();
+		// const createdId = result.lastRowId;
 
-		let createdId = insertResult.lastRowId || selectResult.results?.[0]?.id;
+		const result = await this.db
+			.prepare("INSERT INTO `Item` (`label`) VALUES (?) RETURNING `id`;")
+			.bind(label)
+			.first<{ id: number }>();
+		const createdId = result?.id;
 
 		if (typeof createdId !== "number") {
 			throw new Error("Failed to create item.");
@@ -59,7 +63,7 @@ export class D1ItemsService implements ItemsService {
 			.bind(id)
 			.run();
 
-		// This is not yet implemented in the D1 alpha
+		// `changes` is not yet implemented in the D1 alpha
 		// if (!result.changes) {
 		// 	throw new Error("Failed to delete item.");
 		// }
