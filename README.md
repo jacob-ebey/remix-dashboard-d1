@@ -46,7 +46,7 @@ npm run build && npx wrangler publish
 
 ## Subsequent deployments
 
-Configure a GitHub Actions secrets of `CF_API_TOKEN` with the normal worker deployment permissions + the new D1 wright permissions to be able to apply migrations on deployment.
+Configure a GitHub Actions secrets of `CF_API_TOKEN` with the normal worker deployment permissions + the new D1 write permissions to be able to apply migrations on deployment.
 
 To trigger a deployment:
 
